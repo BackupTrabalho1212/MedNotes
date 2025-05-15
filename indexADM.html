@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+    <style>
+        .card-metric {
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+        }
+        .card-metric:hover {
+            transform: translateY(-5px);
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .metric-label {
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active text-white" href="#">
+                                Visão Geral
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#">
+                                Usuários
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#">
+                                Conteúdo
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#">
+                                Configurações
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <h1 class="h2 mb-4">Painel Administrativo</h1>
+                
+                <!-- Métricas Rápidas -->
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card card-metric bg-primary text-white">
+                            <div class="card-body">
+                                <h5 class="card-title metric-label">Usuários</h5>
+                                <p class="metric-value" id="user-count">1,254</p>
+                                <p class="card-text"><small>+12% desde ontem</small></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card card-metric bg-success text-white">
+                            <div class="card-body">
+                                <h5 class="card-title metric-label">Acessos</h5>
+                                <p class="metric-value" id="access-count">5,678</p>
+                                <p class="card-text"><small>+8% desde ontem</small></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card card-metric bg-warning text-dark">
+                            <div class="card-body">
+                                <h5 class="card-title metric-label">Novos Pedidos</h5>
+                                <p class="metric-value" id="orders-count">42</p>
+                                <p class="card-text"><small>+5% desde ontem</small></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card card-metric bg-info text-white">
+                            <div class="card-body">
+                                <h5 class="card-title metric-label">Receita</h5>
+                                <p class="metric-value" id="revenue-count">R$ 12,345</p>
+                                <p class="card-text"><small>+15% desde ontem</small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficos -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Acessos nos últimos 30 dias</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="accessChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Distribuição de Usuários</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="userDistributionChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela de Atividades Recentes -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Atividades Recentes</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Usuário</th>
+                                                <th>Ação</th>
+                                                <th>Data</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recent-activities">
+                                            <!-- Dados serão preenchidos via JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script>
+        // Dados simulados - substitua por chamadas AJAX para seu backend
+        document.addEventListener('DOMContentLoaded', function() {
+            // Atualizar métricas rápidas
+            updateQuickMetrics();
+            
+            // Inicializar gráficos
+            initAccessChart();
+            initUserDistributionChart();
+            
+            // Carregar atividades recentes
+            loadRecentActivities();
+        });
+
+        function updateQuickMetrics() {
+            // Simulação - substitua por dados reais
+            document.getElementById('user-count').textContent = '1,842';
+            document.getElementById('access-count').textContent = '8,765';
+            document.getElementById('orders-count').textContent = '56';
+            document.getElementById('revenue-count').textContent = 'R$ 18,230';
+        }
+
+        function initAccessChart() {
+            const ctx = document.getElementById('accessChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 30}, (_, i) => `${i+1}/06`),
+                    datasets: [{
+                        label: 'Acessos',
+                        data: Array.from({length: 30}, () => Math.floor(Math.random() * 500) + 200),
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function initUserDistributionChart() {
+            const ctx = document.getElementById('userDistributionChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Administradores', 'Editores', 'Usuários Comuns', 'Visitantes'],
+                    datasets: [{
+                        data: [5, 12, 1500, 325],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadRecentActivities() {
+            const activities = [
+                {id: 1, user: 'admin', action: 'Atualizou configurações', date: '2023-06-15 14:30', status: 'Concluído'},
+                {id: 2, user: 'joao.silva', action: 'Cadastrou novo produto', date: '2023-06-15 13:45', status: 'Concluído'},
+                {id: 3, user: 'maria.souza', action: 'Excluiu comentário', date: '2023-06-15 12:20', status: 'Concluído'},
+                {id: 4, user: 'system', action: 'Backup automático', date: '2023-06-15 03:00', status: 'Concluído'},
+                {id: 5, user: 'carlos.oliveira', action: 'Tentativa de login falha', date: '2023-06-14 23:15', status: 'Falha'}
+            ];
+
+            const tbody = document.getElementById('recent-activities');
+            tbody.innerHTML = activities.map(activity => `
+                <tr>
+                    <td>${activity.id}</td>
+                    <td>${activity.user}</td>
+                    <td>${activity.action}</td>
+                    <td>${activity.date}</td>
+                    <td><span class="badge ${activity.status === 'Concluído' ? 'bg-success' : 'bg-danger'}">${activity.status}</span></td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

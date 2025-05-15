@@ -151,6 +151,9 @@
             <button id="view-notes-btn" class="text-gray-600 p-2">
                 <i class="fas fa-book text-xl"></i>
             </button>
+            <button id="settings-btn" class="text-gray-600 p-2">
+            <i class="fas fa-cog text-xl"></i>
+            </button>
         </nav>
     </div>
     
@@ -162,42 +165,86 @@
         </div>
     </div>
 
+    <!-- Modal de Configurações -->
+<div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold">Configurações</h2>
+            <button id="close-settings" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" class="rounded text-blue-500 mr-2">
+                        <span>Modo Escuro</span>
+                    </label>
+                </div>
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" class="rounded text-blue-500 mr-2">
+                        <span>Notificações</span>
+                    </label>
+                </div>
+                <button class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition">
+                    Salvar Configurações
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Dados de usuário (simulando um banco de dados)
-        const users = [
-            { email: "medico@exemplo.com", password: "senha123", name: "Dr. Silva" }
-        ];
-        
-        // Verifica se o usuário está logado ao carregar a página
-        document.addEventListener('DOMContentLoaded', function() {
-            if (localStorage.getItem('loggedIn') === 'true') {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
-                loadNotes();
-            }
-        });
-        
-        // Sistema de Login
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
+         // Dados de usuário (simulando um banco de dados)
+    const users = [
+        { email: "medico@exemplo.com", password: "senha123", name: "Dr. Silva", role: "user" },
+        { email: "admin@exemplo.com", password: "admin123", name: "Administrador", role: "admin" }
+    ];
+    
+    // Verifica se o usuário está logado ao carregar a página
+    document.addEventListener('DOMContentLoaded', function() {
+        if (localStorage.getItem('loggedIn') === 'true') {
+            const user = JSON.parse(localStorage.getItem('user'));
             
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            
-            // Verifica as credenciais
-            const user = users.find(u => u.email === email && u.password === password);
-            
-            if (user) {
-                // Login bem-sucedido
-                localStorage.setItem('loggedIn', 'true');
-                localStorage.setItem('user', JSON.stringify(user));
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
-                loadNotes();
+            // Se for admin, redireciona para config.html
+            if (user.role === "admin") {
+                window.location.href = "configADM.html";
             } else {
-                alert('E-mail ou senha incorretos. Use: medico@exemplo.com / senha123');
+                // Usuário normal, mostra o app
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+                loadNotes();
             }
-        });
+        }
+    });
+    
+    // Sistema de Login
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        
+        // Verifica as credenciais
+        const user = users.find(u => u.email === email && u.password === password);
+        
+        if (user) {
+            // Login bem-sucedido
+            localStorage.setItem('loggedIn', 'true');
+            localStorage.setItem('user', JSON.stringify(user));
+            
+            // Verifica o tipo de usuário
+            if (user.role === "admin") {
+                window.location.href = "configADM.html";
+            } else {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+                loadNotes();
+            }
+        } else {
+            alert('E-mail ou senha incorretos. Use: medico@exemplo.com / senha123 ou admin@exemplo.com / admin123');
+        }
+    });
         
         // Sistema de Logout
         document.getElementById('logout-btn').addEventListener('click', function() {
@@ -253,7 +300,7 @@
                 });
             });
         }
-        
+
         // Renderiza a lista de anotações na sidebar
         function renderSidebarNotes(notes) {
             const sidebarList = document.getElementById('sidebar-notes-list');
