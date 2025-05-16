@@ -223,9 +223,12 @@
                 const roleSection = document.createElement('div');
                 roleSection.className = 'role-section';
                 
-                const roleTitle = document.createElement('div');
+               const roleTitle = document.createElement('div');
                 roleTitle.className = 'role-title';
-                roleTitle.textContent = role + 's'; // Pluraliza (ex: Administrador -> Administradores)
+                roleTitle.textContent = role === 'Administrador' ? 'Administradores' : 
+                role === 'Professor' ? 'Professores' : 
+                role === 'Aluno' ? 'Alunos' : 
+                role + 's';
                 
                 const table = document.createElement('div');
                 table.className = 'responsive-table';

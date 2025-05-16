@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - MedNotes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .card-metric {
+            transition: all 0.2s ease;
+            border-left: 4px solid #3b82f6;
+        }
+        .card-metric:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .audit-log-item {
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .audit-log-item:hover {
+            background-color: #f8fafc;
+            border-left-color: #3b82f6;
+        }
+        .audit-log-item.security {
+            border-left-color: #ef4444;
+        }
+        .audit-log-item.user {
+            border-left-color: #10b981;
+        }
+        .audit-log-item.system {
+            border-left-color: #6366f1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Cabeçalho -->
+    <header class="bg-white shadow-sm p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-book-medical text-xl text-blue-500 mr-2"></i>
+                <h1 class="text-xl font-bold text-gray-800">MedNotes - Painel Admin</h1>
+            </div>
+            <button id="logout-btn" class="text-gray-600 hover:text-blue-600">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </button>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="container mx-auto p-4 pb-20">
+        <!-- Métricas Rápidas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="card-metric bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h5 class="text-sm font-medium text-gray-500">Usuários Ativos</h5>
+                        <p class="metric-value text-blue-600">142</p>
+                        <p class="text-xs text-gray-500"><i class="fas fa-arrow-up text-green-500 mr-1"></i> 12% este mês</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-user-md text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-metric bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h5 class="text-sm font-medium text-gray-500">Anotações Hoje</h5>
+                        <p class="metric-value text-green-600">87</p>
+                        <p class="text-xs text-gray-500"><i class="fas fa-arrow-up text-green-500 mr-1"></i> 5% desde ontem</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-book-medical text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-metric bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h5 class="text-sm font-medium text-gray-500">Alertas</h5>
+                        <p class="metric-value text-red-600">3</p>
+                        <p class="text-xs text-gray-500"><i class="fas fa-exclamation-triangle text-red-500 mr-1"></i> Precisa atenção</p>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <i class="fas fa-shield-alt text-red-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-metric bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h5 class="text-sm font-medium text-gray-500">Uso de IA</h5>
+                        <p class="metric-value text-purple-600">56</p>
+                        <p class="text-xs text-gray-500"><i class="fas fa-robot text-purple-500 mr-1"></i> Hoje</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-brain text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registro de Auditoria -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-semibold text-gray-800">Registro de Auditoria</h2>
+                    <div class="flex space-x-2">
+                        <select id="audit-filter" class="text-sm border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="all">Todos os Eventos</option>
+                            <option value="security">Segurança</option>
+                            <option value="user">Usuários</option>
+                            <option value="system">Sistema</option>
+                        </select>
+                        <button id="export-audit" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition">
+                            <i class="fas fa-download mr-1"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="divide-y divide-gray-200">
+                <!-- Cabeçalho da Tabela -->
+                <div class="grid grid-cols-12 bg-gray-50 p-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div class="col-span-1">Tipo</div>
+                    <div class="col-span-2">Data/Hora</div>
+                    <div class="col-span-3">Usuário</div>
+                    <div class="col-span-4">Evento</div>
+                    <div class="col-span-2">IP</div>
+                </div>
+                
+                <!-- Itens do Registro de Auditoria -->
+                <div id="audit-log-items" class="divide-y divide-gray-100">
+                    <!-- Itens serão carregados via JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Paginação -->
+            <div class="p-4 border-t border-gray-200 flex justify-between items-center">
+                <div class="text-sm text-gray-500">
+                    Mostrando 1 a 10 de 127 registros
+                </div>
+                <div class="flex space-x-1">
+                    <button class="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="px-3 py-1 rounded border border-blue-500 bg-blue-500 text-white">1</button>
+                    <button class="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">2</button>
+                    <button class="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">3</button>
+                    <button class="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertas do Sistema -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-800">Alertas Recentes</h2>
+            </div>
+            <div class="divide-y divide-gray-200">
+                <div class="p-4 bg-red-50 flex items-start">
+                    <div class="bg-red-100 p-2 rounded-full mr-3">
+                        <i class="fas fa-shield-alt text-red-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium">Tentativa de Acesso Não Autorizado</p>
+                        <p class="text-sm text-gray-600">Múltiplas tentativas de login falhas para o usuário admin</p>
+                        <p class="text-xs text-gray-500 mt-1">IP: 192.168.1.45 - 15/06/2023 14:32</p>
+                    </div>
+                    <button class="text-red-600 hover:text-red-800 ml-2">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-4 bg-yellow-50 flex items-start">
+                    <div class="bg-yellow-100 p-2 rounded-full mr-3">
+                        <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium">Backup Atrasado</p>
+                        <p class="text-sm text-gray-600">Backup do sistema não realizado nas últimas 24 horas</p>
+                        <p class="text-xs text-gray-500 mt-1">Sistema - 15/06/2023 08:15</p>
+                    </div>
+                    <button class="text-yellow-600 hover:text-yellow-800 ml-2">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Rodapé Móvel -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3">
+        <a href="indexADM.html" class="text-blue-600 p-2">
+            <i class="fas fa-home text-xl"></i>
+        </a>
+        <a href="configADM.html" class="text-gray-600 p-2">
+            <i class="fas fa-cog text-xl"></i>
+        </a>
+    </nav>
+
+    <script>
+        // Dados de auditoria (simulados)
+        const auditLogs = [
+            { id: 1, type: 'security', date: '15/06/2023 14:30', user: 'admin', event: 'Login bem-sucedido', ip: '192.168.1.100', icon: 'fa-user-lock', color: 'text-red-500' },
+            { id: 2, type: 'user', date: '15/06/2023 14:15', user: 'dr.silva', event: 'Criou nova anotação médica', ip: '192.168.1.101', icon: 'fa-file-medical', color: 'text-green-500' },
+            { id: 3, type: 'system', date: '15/06/2023 13:45', user: 'Sistema', event: 'Backup automático realizado', ip: '127.0.0.1', icon: 'fa-database', color: 'text-blue-500' },
+            { id: 4, type: 'security', date: '15/06/2023 13:30', user: 'dra.oliveira', event: 'Alteração de senha', ip: '192.168.1.102', icon: 'fa-key', color: 'text-red-500' },
+            { id: 5, type: 'user', date: '15/06/2023 12:20', user: 'enf.souza', event: 'Exclusão de anotação', ip: '192.168.1.103', icon: 'fa-trash-alt', color: 'text-green-500' },
+            { id: 6, type: 'system', date: '15/06/2023 11:10', user: 'Sistema', event: 'Atualização de software', ip: '127.0.0.1', icon: 'fa-sync-alt', color: 'text-blue-500' },
+            { id: 7, type: 'security', date: '15/06/2023 10:45', user: 'admin', event: 'Configurações alteradas', ip: '192.168.1.100', icon: 'fa-cog', color: 'text-red-500' },
+            { id: 8, type: 'user', date: '15/06/2023 09:30', user: 'dr.santos', event: 'Uso de análise por IA', ip: '192.168.1.104', icon: 'fa-robot', color: 'text-green-500' },
+            { id: 9, type: 'security', date: '15/06/2023 08:15', user: 'Sistema', event: 'Tentativa de acesso bloqueada', ip: '189.45.210.33', icon: 'fa-ban', color: 'text-red-500' },
+            { id: 10, type: 'user', date: '14/06/2023 23:45', user: 'dr.silva', event: 'Visualização de prontuário', ip: '192.168.1.101', icon: 'fa-eye', color: 'text-green-500' }
+        ];
+
+        // Verifica se o usuário está logado como admin
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('loggedIn') !== 'true') {
+                window.location.href = 'index.html';
+            }
+            
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user.role !== 'admin') {
+                window.location.href = 'index.html';
+            }
+            
+            renderAuditLogs();
+            setupEventListeners();
+        });
+
+        // Renderiza os logs de auditoria
+        function renderAuditLogs(filter = 'all') {
+            const container = document.getElementById('audit-log-items');
+            const filteredLogs = filter === 'all' 
+                ? auditLogs 
+                : auditLogs.filter(log => log.type === filter);
+            
+            container.innerHTML = filteredLogs.map(log => `
+                <div class="audit-log-item ${log.type} p-4 grid grid-cols-12 items-center text-sm">
+                    <div class="col-span-1">
+                        <i class="fas ${log.icon} ${log.color}"></i>
+                        <span class="ml-2 capitalize">${log.type}</span>
+                    </div>
+                    <div class="col-span-2 text-gray-600">${log.date}</div>
+                    <div class="col-span-3 font-medium">${log.user}</div>
+                    <div class="col-span-4">${log.event}</div>
+                    <div class="col-span-2 text-gray-500 font-mono">${log.ip}</div>
+                </div>
+            `).join('');
+        }
+
+        // Configura os listeners de eventos
+        function setupEventListeners() {
+            // Filtro de auditoria
+            document.getElementById('audit-filter').addEventListener('change', function() {
+                renderAuditLogs(this.value);
+            });
+            
+            // Botão de exportação
+            document.getElementById('export-audit').addEventListener('click', function() {
+                alert('Exportando registros de auditoria...');
+                // Na prática, aqui você geraria um CSV ou PDF
+            });
+            
+            // Sistema de Logout
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                localStorage.removeItem('loggedIn');
+                localStorage.removeItem('user');
+                window.location.href = 'index.html';
+            });
+        }
+    </script>
+</body>
+</html>
